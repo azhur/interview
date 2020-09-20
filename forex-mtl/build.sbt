@@ -5,7 +5,7 @@ version := "1.0.1"
 
 scalaVersion := "2.12.10"
 scalacOptions ++= Seq(
- "-deprecation",
+  "-deprecation",
   "-encoding",
   "UTF-8",
   "-feature",
@@ -37,6 +37,7 @@ libraryDependencies ++= Seq(
   Libraries.fs2,
   Libraries.http4sDsl,
   Libraries.http4sServer,
+  Libraries.http4sClient,
   Libraries.http4sCirce,
   Libraries.circeCore,
   Libraries.circeGeneric,
@@ -45,7 +46,8 @@ libraryDependencies ++= Seq(
   Libraries.circeJava8,
   Libraries.pureConfig,
   Libraries.logback,
-  Libraries.scalaTest        % Test,
-  Libraries.scalaCheck       % Test,
-  Libraries.catsScalaCheck   % Test
+  Libraries.mulesReload,
+  Libraries.scalaTest      % Test,
+  Libraries.scalaCheck     % Test,
+  Libraries.catsScalaCheck % Test
 )
