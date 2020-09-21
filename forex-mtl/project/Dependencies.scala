@@ -15,7 +15,6 @@ object Dependencies {
     val scalaCheck     = "1.14.3"
     val scalaTest      = "3.1.0"
     val catsScalaCheck = "0.2.0"
-    val mulesReload    = "0.4.0"
   }
 
   object Libraries {
@@ -36,7 +35,6 @@ object Dependencies {
     lazy val circeParser     = circe("circe-parser")
     lazy val circeJava8      = circe("circe-java8")
     lazy val pureConfig      = "com.github.pureconfig" %% "pureconfig" % Versions.pureConfig
-    lazy val mulesReload     = "io.chrisdavenport" %% "mules-reload" % Versions.mulesReload
 
     // Compiler plugins
     lazy val kindProjector = "org.spire-math" %% "kind-projector" % Versions.kindProjector

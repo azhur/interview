@@ -2,25 +2,30 @@ package forex
 
 import cats.Functor
 import cats.effect.{ ConcurrentEffect, Sync, Timer }
-import forex.config.ApplicationConfig
+import forex.config.{ ApplicationConfig, OneFrameApiConfig }
 import forex.http.rates.RatesHttpRoutes
-import forex.services._
 import forex.programs._
+import forex.services._
 import org.http4s._
+import org.http4s.client.Client
+import org.http4s.client.blaze.BlazeClientBuilder
+import org.http4s.client.middleware.{ Retry, RetryPolicy }
 import org.http4s.implicits._
 import org.http4s.server.middleware.{ AutoSlash, Timeout }
-import cats.syntax.functor._
 
-class Module[F[_]: ConcurrentEffect: Timer: Sync: Functor](config: ApplicationConfig) {
+import scala.concurrent.ExecutionContext
 
-  private val oneFrameApiService: OneFrameApi[F] = OneFrameServices.live[F](config.oneFrameApi)
+class Module[F[_]: ConcurrentEffect: Timer: Sync: Functor](config: ApplicationConfig, oneFrameClient: Client[F]) {
+  type SF[T] = fs2.Stream[F, T]
 
-  private val cacheableRateService: F[RatesService[F]] =
-    RatesServices.cacheable[F](config.oneFrameApi, oneFrameApiService)
+  private val oneFrameApiService: OneFrameApi[F] = OneFrameServices.live[F](config.oneFrameApi, oneFrameClient)
 
-  private val ratesProgram: F[RatesProgram[F]] = cacheableRateService.map(RatesProgram[F])
+  private val cacheableRateService: SF[RatesService[F]] =
+    RatesServices.caching[F](oneFrameApiService, config.oneFrameApi.dataMaxAge)
 
-  private val ratesHttpRoutes: F[HttpRoutes[F]] = ratesProgram.map(rp => new RatesHttpRoutes[F](rp).routes)
+  private val ratesProgram: SF[RatesProgram[F]] = cacheableRateService.map(RatesProgram[F])
+
+  private val ratesHttpRoutes: SF[HttpRoutes[F]] = ratesProgram.map(new RatesHttpRoutes[F](_).routes)
 
   type PartialMiddleware = HttpRoutes[F] => HttpRoutes[F]
   type TotalMiddleware   = HttpApp[F] => HttpApp[F]
@@ -35,8 +40,25 @@ class Module[F[_]: ConcurrentEffect: Timer: Sync: Functor](config: ApplicationCo
     Timeout(config.http.timeout)(http)
   }
 
-  private val http: F[HttpRoutes[F]] = ratesHttpRoutes
+  private val http: SF[HttpRoutes[F]] = ratesHttpRoutes
 
-  val httpApp: F[HttpApp[F]] = http.map(http => appMiddleware(routesMiddleware(http).orNotFound))
+  val httpApp: SF[HttpApp[F]] = http.map(http => appMiddleware(routesMiddleware(http).orNotFound))
 
+}
+
+object Module {
+  def buildOneFrameHttpClient[F[_]: ConcurrentEffect: Timer](config: OneFrameApiConfig): fs2.Stream[F, Client[F]] =
+    // todo use separate EC?
+    BlazeClientBuilder[F](ExecutionContext.global)
+      .withConnectTimeout(config.http.timeout)
+      .withRequestTimeout(config.http.timeout)
+      .stream
+      .map { client =>
+        val retryPolicy =
+          RetryPolicy[F](
+            RetryPolicy
+              .exponentialBackoff(maxWait = config.retryMaxWait, maxRetry = config.retries)
+          )
+        Retry[F](retryPolicy)(client)
+      }
 }

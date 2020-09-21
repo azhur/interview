@@ -1,11 +1,11 @@
 package forex.services.oneframe
 
-import cats.Functor
-import cats.effect.{ ConcurrentEffect, Sync, Timer }
+import cats.effect.Sync
 import forex.config.OneFrameApiConfig
 import forex.services.oneframe.interpreters.LiveOneFrameClient
+import org.http4s.client.Client
 
 object Interpreters {
-  def live[F[_]: Sync: Functor: ConcurrentEffect: Timer](config: OneFrameApiConfig): Algebra[F] =
-    new LiveOneFrameClient[F](config)
+  def live[F[_]: Sync](config: OneFrameApiConfig, client: Client[F]): Algebra[F] =
+    new LiveOneFrameClient[F](config, client)
 }

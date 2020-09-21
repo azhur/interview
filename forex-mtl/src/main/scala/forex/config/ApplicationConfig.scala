@@ -13,4 +13,8 @@ case class HttpConfig(
     timeout: FiniteDuration
 )
 
-case class OneFrameApiConfig(http: HttpConfig, token: String, retries: Int, retryMaxWait: FiniteDuration)
+case class OneFrameApiConfig(http: HttpConfig,
+                             token: String,
+                             retries: Int,
+                             retryMaxWait: FiniteDuration,
+                             dataMaxAge: FiniteDuration)

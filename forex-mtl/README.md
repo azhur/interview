@@ -44,3 +44,4 @@ Lets consider Several Solutions (given the `Forex` requests nature assumption ab
  - add logging, metrics, tracing
  - create generic error handlers
  - more unit tests
+ - handle stale cache data when the `One-Frame` is down.
