@@ -1,17 +1,17 @@
-package forex.rates
-package http
+package forex.http
+package rates
 
 import java.time.{ Instant, OffsetDateTime, ZoneOffset }
 
 import cats.effect._
 import forex.domain.{ Currency, Price, Rate, Timestamp }
-import forex.http.rates.RatesHttpRoutes
 import forex.programs.RatesProgram
-import forex.programs.rates.{ errors, Protocol }
+import forex.programs.rates.Protocol.GetRatesRequest
+import forex.programs.rates.errors.Error
+import forex.programs.rates.errors.Error.RateLookupFailed
 import io.circe._
-import org.http4s.{ Request, _ }
-import org.http4s.circe._
 import org.http4s.implicits._
+import org.http4s.{ Request, _ }
 import org.scalatest.Assertion
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
@@ -20,8 +20,8 @@ class RatesHttpRoutesSpec extends AnyFreeSpec with Matchers {
   "/rates endpoint" - {
     "should handle invalid query params" - {
       val failureProgram = new RatesProgram[IO] {
-        override def get(request: Protocol.GetRatesRequest): IO[Either[errors.Error, Rate]] =
-          IO.pure(Left(errors.Error.RateLookupFailed("lookup failed")))
+        override def get(request: GetRatesRequest): IO[Either[Error, Rate]] =
+          IO.pure(Left(RateLookupFailed("lookup failed")))
       }
       "missing from and to" in {
         runRequest(
@@ -56,7 +56,7 @@ class RatesHttpRoutesSpec extends AnyFreeSpec with Matchers {
     }
     "should handle valid request" in {
       val program = new RatesProgram[IO] {
-        override def get(request: Protocol.GetRatesRequest): IO[Either[errors.Error, Rate]] =
+        override def get(request: GetRatesRequest): IO[Either[Error, Rate]] =
           IO.pure(
             Right(
               Rate(
