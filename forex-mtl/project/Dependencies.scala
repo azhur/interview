@@ -15,6 +15,7 @@ object Dependencies {
     val scalaCheck     = "1.14.3"
     val scalaTest      = "3.1.0"
     val catsScalaCheck = "0.2.0"
+    val jawnFs2        = "0.15.0"
   }
 
   object Libraries {
@@ -29,6 +30,7 @@ object Dependencies {
     lazy val http4sServer    = http4s("http4s-blaze-server")
     lazy val http4sClient    = http4s("http4s-blaze-client")
     lazy val http4sCirce     = http4s("http4s-circe")
+    lazy val http4sJawnFs2   = "org.http4s" %% "jawn-fs2" % Versions.jawnFs2
     lazy val circeCore       = circe("circe-core")
     lazy val circeGeneric    = circe("circe-generic")
     lazy val circeGenericExt = circe("circe-generic-extras")

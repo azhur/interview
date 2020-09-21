@@ -42,7 +42,7 @@ object CachingOneFrame {
       ref <- fs2.Stream.eval(Ref.of[F, List[GetRatesResponse]](initialValue))
       autoLoader = restartStream(
         fs2.Stream
-          .awakeEvery[F](dataMaxAge)
+          .awakeEvery[F](dataMaxAge.minus(1.minute)) // todo 1 minute for request completion, move it to conf file
           .evalMap(_ => loader.flatMap(v => ref.set(v)))
       )
 
