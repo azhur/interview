@@ -45,6 +45,6 @@ Lets consider Several Solutions (given the `Forex` requests nature assumption ab
  - handle `One-Frame` errors more accurately
    - `One-Frame` returns 200(OK) for quota reached errors, and for invalid currency pairs too, currently those will be mapped to `Forex` GenericError (500).
  - add logging, metrics, tracing
- - create generic error handlers
+ - create generic error handlers, so they could be reused
  - handle stale cache data when the `One-Frame` is down for a long time.
  - custom value classes for bid and ask (one-frame response), or just ignore them and don't parse
