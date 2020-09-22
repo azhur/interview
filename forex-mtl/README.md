@@ -45,3 +45,4 @@ Lets consider Several Solutions (given the `Forex` requests nature assumption ab
  - create generic error handlers
  - more unit tests
  - handle stale cache data when the `One-Frame` is down.
+ - custom value classes for bid and ask (one-frame response), or just ignore them and don't parse

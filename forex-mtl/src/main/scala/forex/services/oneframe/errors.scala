@@ -1,7 +1,7 @@
 package forex.services.oneframe
 
 object errors {
-  sealed abstract class OneFrameError(val error: String) extends Throwable with Product with Serializable
+  sealed abstract class OneFrameError(val error: String) extends Throwable(error) with Product with Serializable
 
   object OneFrameError {
     final case class QuotaReachedError(override val error: String) extends OneFrameError(error)
