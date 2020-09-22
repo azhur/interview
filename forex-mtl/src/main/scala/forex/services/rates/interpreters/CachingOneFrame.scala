@@ -51,7 +51,7 @@ object CachingOneFrame {
     } yield cache
   }
 
-  private lazy val AllCurrencyPairs = {
+  private[rates] lazy val AllCurrencyPairs = {
     val pairs        = Currency.values.toList.combinations(2).toList
     val reversePairs = pairs.map(_.reverse)
     (pairs ++ reversePairs).map(l => Rate.Pair(l.head, l.tail.head)).toSet

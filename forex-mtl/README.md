@@ -22,7 +22,9 @@ Lets consider Several Solutions (given the `Forex` requests nature assumption ab
     - The Forex will support only 1k rps. As basically the cache won't help here at all.
  2. Map `Forex` request (1 pair) to the `One-Frame` request (2 pairs, ie: `USDEUR`, `EURUSD`) and cache the `One-Frame` result for 5 mins. 
     - This reduces the `One-Frame` requests number, but still we won't meet our '10k' requirement.
- 3. Use a cache with a periodic loader which queries `One-Frame` every 4 mins for all pairs at once.
+ 3. Use scalacache with Caffeine, make `One-Frame` api call for all the currency pairs and cache the results under one dummy key.
+    - the downside of this is that on parallel `Forex` requests at the same time when cache should be reloaded, multiple `One-Frame` requests will be issued as the Caffeine cache is sync.
+ 4. Use a cache with a periodic loader which queries `One-Frame` every 4 mins for all pairs at once.
     - This would consume `360 (24*60/4)` `One-Frame` requests only. As the loader will happen in background, 
     1 min will be reserved for the `One-Frame` request completion, so the response data is not stale ( < 5 mins).
  
@@ -39,10 +41,10 @@ Lets consider Several Solutions (given the `Forex` requests nature assumption ab
 
 
 ## Things to improve
+ - add more unit tests to cover more scenarios
  - handle `One-Frame` errors more accurately
    - `One-Frame` returns 200(OK) for quota reached errors, and for invalid currency pairs too, currently those will be mapped to `Forex` GenericError (500).
  - add logging, metrics, tracing
  - create generic error handlers
- - more unit tests
- - handle stale cache data when the `One-Frame` is down.
+ - handle stale cache data when the `One-Frame` is down for a long time.
  - custom value classes for bid and ask (one-frame response), or just ignore them and don't parse
